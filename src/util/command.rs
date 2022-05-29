@@ -1,7 +1,8 @@
 //! Contains utility functions that interact with the command line
 
-use anyhow::Result;
 use std::process;
+
+use anyhow::Result;
 
 /// Attempts to get the path to the tool with the given identifier using the `which` command.
 /// For example, if you have `rg` installed on your PATH at /opt/homebrew/bin, this function

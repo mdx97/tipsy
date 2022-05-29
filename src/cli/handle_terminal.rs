@@ -1,5 +1,6 @@
 //! Contains the core logic of the terminal command handlers
 
+use crate::db::Database;
 use crate::util::get_tool_path;
 
 // There are several Option::unwrap calls in this file on the return value of
@@ -10,19 +11,30 @@ use crate::util::get_tool_path;
 
 pub fn handle_tools_add_command(matches: &clap::ArgMatches) {
     let tool = matches.value_of("TOOL").unwrap();
-    let path = get_tool_path(tool).expect("Failed to get path for tool");
-    println!("{}", path);
+
+    // We will recompute the tool path on each run, so we just want to verify that the tool is
+    // installed on path for this run.
+    get_tool_path(tool).expect("Failed to get path for tool");
+
+    let mut database = Database::require();
+    database.add_tool(tool);
+    database.save();
 }
 
 pub fn handle_tools_remove_command(matches: &clap::ArgMatches) {
     let tool = matches.value_of("TOOL").unwrap();
-    println!("TODO: Remove {} from list of tools!", tool);
+    let mut database = Database::require();
+    database.remove_tool(tool);
+    database.save();
 }
 
 // Tips commands
 
 pub fn handle_tips_get_command(matches: &clap::ArgMatches) {
     let tool = matches.value_of("TOOL").unwrap();
-    let path = get_tool_path(tool).expect("Failed to get path for tool");
-    println!("TODO: Get tip from {}", path);
+    let database = Database::require();
+
+    if let Some(tool) = database.get_tool(tool) {
+        println!("{}", tool.get_random_tip());
+    }
 }

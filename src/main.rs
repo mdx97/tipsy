@@ -1,6 +1,8 @@
 //! Command line tool to get tips about your other favorite command line tools
 
+mod db;
 mod cli;
+mod consts;
 mod util;
 
 use crate::cli::{build_command, handle_command};
