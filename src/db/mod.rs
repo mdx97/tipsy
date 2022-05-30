@@ -1,4 +1,4 @@
-//! Contains structs that house data from the .tipsy directory
+//! Controls the persistence of data related to tipsy.
 
 use std::cmp::Ordering;
 use std::fs::File;
@@ -11,11 +11,15 @@ use anyhow::Result;
 use crate::consts::TIPSY_DIRECTORY;
 use crate::util::get_tool_path;
 
+/// Controls data persistence and loading from disk (namely, persistent data in the .tipsy
+/// directory.)
 pub struct Database {
     tools: Vec<Tool>,
 }
 
 impl Database {
+    /// Attempts to create a new instance of `Database` and syncs the initial
+    /// state between this struct and the data on disk.
     pub fn new() -> Result<Self> {
         let status = create_db_if_not_exists()?;
         let mut tools = Vec::new();
@@ -29,42 +33,50 @@ impl Database {
             tools,
         })
     }
-    
+   
+    /// Attempts to create a new instance of `Database` and panics on failure.
     pub fn require() -> Self {
         Self::new().expect("Failed to create database")
     }
 
+    /// Adds a new tool to the tools field.
     pub fn add_tool(&mut self, tool: impl Into<String>) {
         self.tools.push(Tool(tool.into())); 
     }
-
+    
+    /// Removes a tool from the tools field.
     pub fn remove_tool(&mut self, tool: impl Into<String>) {
         let tool = tool.into();
         self.tools.retain(|x| *x.0 == tool);
     }
-
+    
+    /// Attempts to find a tool from the tools field with the given name.
     pub fn get_tool(&self, tool: impl Into<String>) -> Option<&Tool> {
         let tool = tool.into();
         self.tools.iter().find(|&x| x.0 == tool)
     }
 
+    /// Writes all persistent data to disk (calls to methods such as Database::add_tool or
+    /// Database::remove_tool are not persisted automatically and require a Database::save call in
+    /// order to write these changes to disk.)
     pub fn save(&self) {
         // TODO: Write to file
     }
 }
 
+/// Signals what state the database was in before this program run.
 #[derive(PartialEq)]
 enum DatabaseStatus {
     Existed,
     Fresh,
 }
 
-/// Creates the local database files (if necessary) in the .tipsy directory 
+/// Creates the local database files (if necessary) in the .tipsy directory.
 fn create_db_if_not_exists() -> Result<DatabaseStatus> {
     Ok(DatabaseStatus::Fresh)
 }
 
-/// Reads in the list of tools from the ~/.tipsy/tools file
+/// Reads in the list of tools from the ~/.tipsy/tools file.
 fn read_tools_from_file() -> Result<Vec<Tool>> {
     let file = File::open(format!("{}/tools", TIPSY_DIRECTORY))?;
     let reader = BufReader::new(file);
@@ -77,9 +89,11 @@ fn read_tools_from_file() -> Result<Vec<Tool>> {
     Ok(tools)
 }
 
+/// Wrapper type for a tool name.
 pub struct Tool(String);
 
 impl Tool {
+    /// Gets a random tip from this program's help text.
     pub fn get_random_tip(&self) -> Result<String> {
         let path = get_tool_path(self.0.as_str())?;
         let format = infer_tool_output_format(&self.0)?;
@@ -93,7 +107,7 @@ impl Tool {
     }
 }
 
-/// Takes the given command output and the format of it and calculates all the potential tips for
+/// Takes the given help output and the format of it and calculates all the potential tips for
 /// the command.
 fn get_available_tips_from_output(
     output: impl AsRef<str>,
@@ -126,12 +140,13 @@ fn get_available_tips_from_output(
     tips
 }
 
+/// Represents how to interpret the help output for a program.
 enum ToolOutputFormat {
     /// Basic UNIX format with USAGE, OPTIONS, etc. sections
     Basic,
 }
 
-/// Infers what sort of help output the given tool will have
+/// Infers what sort of help output the given tool will have.
 /// Right now, ToolOutputFormat::Basic is the only options, but this api exists to prevent breaking
 /// changes happening.
 fn infer_tool_output_format(tool: &impl Into<String>) -> Result<ToolOutputFormat> {
