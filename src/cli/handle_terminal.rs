@@ -30,6 +30,16 @@ pub fn handle_tools_remove_command(matches: &clap::ArgMatches) {
     database.save().expect("Failed to save for tool removal");
 }
 
+/// Shows all tools currently saved in the database.
+pub fn handle_tools_list_command(_matches: &clap::ArgMatches) {
+    let database = Database::require();
+    let tools = database.get_all_tools();
+
+    for tool in tools {
+        println!("{}", tool.0);
+    }
+}
+
 // Tips commands
 
 /// Get a tip for a given tool (or, eventually a random one.)

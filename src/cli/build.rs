@@ -18,6 +18,7 @@ fn build_tools_subcommand<'a>() -> clap::Command<'a> {
         .about("Manage tools you are learning about")
         .subcommand(build_tools_add_subcommand())
         .subcommand(build_tools_remove_subcommand())
+        .subcommand(build_tools_list_subcommand())
         .subcommand_required(true)
 }
 
@@ -33,6 +34,11 @@ fn build_tools_remove_subcommand<'a>() -> clap::Command<'a> {
         .about("Remove a tool you no longer want to learn about")
         .arg(arg!([TOOL]))
         .arg_required_else_help(true)
+}
+
+fn build_tools_list_subcommand<'a>() -> clap::Command<'a> {
+    clap::Command::new("list")
+        .about("List all tools you are currently learning about")
 }
 
 // Tips subcommand

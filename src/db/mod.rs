@@ -53,6 +53,11 @@ impl Database {
         self.tools.iter().find(|&x| x.0 == tool)
     }
 
+    /// Returns the contents of the tools field.
+    pub fn get_all_tools(&self) -> &Vec<Tool> {
+        &self.tools
+    }
+
     /// Writes all persistent data to disk (calls to methods such as Database::add_tool or
     /// Database::remove_tool are not persisted automatically and require a Database::save call in
     /// order to write these changes to disk.)
@@ -104,7 +109,7 @@ fn read_tools_from_file() -> Result<Vec<Tool>> {
 }
 
 /// Wrapper type for a tool name.
-pub struct Tool(String);
+pub struct Tool(pub String);
 
 impl Tool {
     /// Gets a random tip from this program's help text.
