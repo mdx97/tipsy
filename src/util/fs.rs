@@ -2,8 +2,8 @@
 
 extern crate dirs;
 
-use std::path::PathBuf;
 use std::path::Path;
+use std::path::PathBuf;
 
 use crate::consts::TIPSY_DIRECTORY;
 
@@ -15,5 +15,3 @@ pub fn tipsy_path() -> Box<Path> {
     path.push(TIPSY_DIRECTORY);
     path.into_boxed_path()
 }
-
-

@@ -88,7 +88,7 @@ fn create_db_if_not_exists() -> Result<DatabaseStatus> {
     if tipsy_path.exists() {
         return Ok(DatabaseStatus::Existed);
     }
-    
+
     create_dir(&tipsy_path)?;
     File::create(tipsy_path.join("tools"))?;
 

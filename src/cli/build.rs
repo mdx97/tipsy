@@ -37,8 +37,7 @@ fn build_tools_remove_subcommand<'a>() -> clap::Command<'a> {
 }
 
 fn build_tools_list_subcommand<'a>() -> clap::Command<'a> {
-    clap::Command::new("list")
-        .about("List all tools you are currently learning about")
+    clap::Command::new("list").about("List all tools you are currently learning about")
 }
 
 // Tips subcommand
