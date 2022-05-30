@@ -8,8 +8,7 @@ use anyhow::Result;
 use crate::tool::Tool;
 use crate::util::tipsy_path;
 
-/// Controls data persistence and loading from disk (namely, persistent data in the .tipsy
-/// directory.)
+/// Controls data persistence and loading from disk (namely, data in the .tipsy directory.)
 pub struct Database {
     tools: Vec<Tool>,
 }
