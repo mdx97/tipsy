@@ -19,7 +19,7 @@ pub fn handle_tools_add_command(matches: &clap::ArgMatches) {
 
     let mut database = Database::require();
     database.add_tool(tool);
-    database.save();
+    database.save().expect("Failed to save for tool addition");
 }
 
 /// Attempts to remove a tool from the database.
@@ -27,7 +27,7 @@ pub fn handle_tools_remove_command(matches: &clap::ArgMatches) {
     let tool = matches.value_of("TOOL").unwrap();
     let mut database = Database::require();
     database.remove_tool(tool);
-    database.save();
+    database.save().expect("Failed to save for tool removal");
 }
 
 // Tips commands

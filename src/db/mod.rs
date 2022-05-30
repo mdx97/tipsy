@@ -3,14 +3,12 @@
 use std::cmp::Ordering;
 use std::fs::{create_dir, File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
-use std::path::Path;
 use std::process;
 use std::str;
 
 use anyhow::Result;
 
-use crate::consts::TIPSY_DIRECTORY;
-use crate::util::get_tool_path;
+use crate::util::{get_tool_path, tipsy_path};
 
 /// Controls data persistence and loading from disk (namely, persistent data in the .tipsy
 /// directory.)
@@ -61,7 +59,7 @@ impl Database {
     pub fn save(&self) -> Result<()> {
         let mut file = OpenOptions::new()
             .write(true)
-            .open(Path::new(TIPSY_DIRECTORY).join("tools"))?;
+            .open(tipsy_path().join("tools"))?;
 
         for tool in &self.tools {
             file.write_all(format!("{}\n", tool.0).as_bytes())?;
@@ -78,23 +76,23 @@ enum DatabaseStatus {
     Fresh,
 }
 
-/// Creates the local database files (if necessary) in the .tipsy directory.
+/// Creates the local data files (if necessary) in the .tipsy directory.
 fn create_db_if_not_exists() -> Result<DatabaseStatus> {
-    let tipsy_dir = Path::new(TIPSY_DIRECTORY);
+    let tipsy_path = tipsy_path();
 
-    if tipsy_dir.exists() {
+    if tipsy_path.exists() {
         return Ok(DatabaseStatus::Existed);
     }
-
-    create_dir(tipsy_dir)?;
-    File::create(tipsy_dir.join("tools"))?;
+    
+    create_dir(&tipsy_path)?;
+    File::create(tipsy_path.join("tools"))?;
 
     Ok(DatabaseStatus::Fresh)
 }
 
 /// Reads in the list of tools from the ~/.tipsy/tools file.
 fn read_tools_from_file() -> Result<Vec<Tool>> {
-    let file = File::open(Path::new(TIPSY_DIRECTORY).join("tools"))?;
+    let file = File::open(tipsy_path().join("tools"))?;
     let reader = BufReader::new(file);
     let mut tools = Vec::new();
 
@@ -121,7 +119,7 @@ impl Tool {
         let output = str::from_utf8(output.stdout.as_slice())?;
 
         let tips = get_available_tips_from_output(output, format);
-        Ok(tips.get(0).unwrap().clone())
+        Ok(get_random_tip(&tips).to_string())
     }
 }
 
@@ -129,7 +127,7 @@ impl Tool {
 /// the command.
 fn get_available_tips_from_output(
     output: impl AsRef<str>,
-    format: ToolOutputFormat,
+    _format: ToolOutputFormat,
 ) -> Vec<String> {
     let lines = output.as_ref().split("\n").collect::<Vec<&str>>();
     let mut tips = Vec::new();
@@ -137,8 +135,12 @@ fn get_available_tips_from_output(
 
     // Skip lines until we find the section with command line options.
     loop {
+        if idx >= lines.len() {
+            return Vec::new();
+        }
+
         if let Some(&line) = lines.get(idx) {
-            if line.cmp("USAGE") == Ordering::Equal {
+            if line.trim().cmp("OPTIONS:") == Ordering::Equal {
                 break;
             }
         }
@@ -148,16 +150,23 @@ fn get_available_tips_from_output(
     idx += 1;
 
     // Take each command line option as a tip.
-    loop {
+    for idx in idx..lines.len() {
         if let Some(&line) = lines.get(idx) {
             tips.push(String::from(line));
-        } else {
-            break;
         }
-        idx += 1;
     }
 
     tips
+}
+
+/// Returns a formatted, random tip from the given list of tips.
+fn get_random_tip(tips: &Vec<String>) -> String {
+    tips.get(0)
+        .unwrap()
+        .trim()
+        .split_whitespace()
+        .collect::<Vec<&str>>()
+        .join(" ")
 }
 
 /// Represents how to interpret the help output for a program.
@@ -168,6 +177,6 @@ enum ToolOutputFormat {
 
 /// Infers what sort of help output the given tool will have. Right now, ToolOutputFormat::Basic
 /// is the only options, but this api exists to prevent breaking changes happening.
-fn infer_tool_output_format(tool: &impl Into<String>) -> Result<ToolOutputFormat> {
+fn infer_tool_output_format(_tool: &impl Into<String>) -> Result<ToolOutputFormat> {
     Ok(ToolOutputFormat::Basic)
 }

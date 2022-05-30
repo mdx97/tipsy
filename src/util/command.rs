@@ -14,5 +14,5 @@ pub fn get_tool_path<'a>(tool: impl Into<&'a str>) -> Result<String> {
     let output = command.output()?;
     let path = std::str::from_utf8(output.stdout.as_slice())?;
 
-    Ok(String::from(path))
+    Ok(String::from(path.trim()))
 }
