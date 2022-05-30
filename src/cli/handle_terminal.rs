@@ -42,12 +42,20 @@ pub fn handle_tools_list_command(_matches: &clap::ArgMatches) {
 
 // Tips commands
 
-/// Get a tip for a given tool (or, eventually a random one.)
+/// Get a tip for a given tool (or a random one, if one was not specified.)
 pub fn handle_tips_get_command(matches: &clap::ArgMatches) {
-    let tool = matches.value_of("TOOL").unwrap();
     let database = Database::require();
 
-    if let Some(tool) = database.get_tool(tool) {
-        println!("{}", tool.get_random_tip().expect("Could not get tip"));
+    let tool = match matches.value_of("TOOL") {
+        Some(tool) => database.get_tool(tool),
+        None => database.get_random_tool(),
+    };
+
+    if let Some(tool) = tool {
+        println!(
+            "[{}] {}",
+            tool.0,
+            tool.get_random_tip().expect("Could not get tip")
+        );
     }
 }

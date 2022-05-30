@@ -58,6 +58,11 @@ impl Database {
         &self.tools
     }
 
+    /// Returns a random entry from the tools field.
+    pub fn get_random_tool(&self) -> Option<&Tool> {
+        self.tools.get(0)
+    }
+
     /// Writes all persistent data to disk (calls to methods such as Database::add_tool or
     /// Database::remove_tool are not persisted automatically and require a Database::save call in
     /// order to write these changes to disk.)
@@ -81,7 +86,7 @@ enum DatabaseStatus {
     Fresh,
 }
 
-/// Creates the local data files (if necessary) in the .tipsy directory.
+/// Creates the .tipsy directory (if necessary).
 fn create_db_if_not_exists() -> Result<DatabaseStatus> {
     let tipsy_path = tipsy_path();
 
@@ -95,7 +100,7 @@ fn create_db_if_not_exists() -> Result<DatabaseStatus> {
     Ok(DatabaseStatus::Fresh)
 }
 
-/// Reads in the list of tools from the ~/.tipsy/tools file.
+/// Reads in the .tipsy/tools file.
 fn read_tools_from_file() -> Result<Vec<Tool>> {
     let file = File::open(tipsy_path().join("tools"))?;
     let reader = BufReader::new(file);

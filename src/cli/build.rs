@@ -53,5 +53,4 @@ fn build_tips_get_subcommand<'a>() -> clap::Command<'a> {
     clap::Command::new("get")
         .about("Get a new tip")
         .arg(arg!([TOOL]))
-        .arg_required_else_help(true)
 }
