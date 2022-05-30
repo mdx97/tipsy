@@ -9,6 +9,7 @@ use crate::util::get_tool_path;
 
 // Tools commands
 
+/// Adds a new tool to the database.
 pub fn handle_tools_add_command(matches: &clap::ArgMatches) {
     let tool = matches.value_of("TOOL").unwrap();
 
@@ -21,6 +22,7 @@ pub fn handle_tools_add_command(matches: &clap::ArgMatches) {
     database.save();
 }
 
+/// Attempts to remove a tool from the database.
 pub fn handle_tools_remove_command(matches: &clap::ArgMatches) {
     let tool = matches.value_of("TOOL").unwrap();
     let mut database = Database::require();
@@ -30,11 +32,12 @@ pub fn handle_tools_remove_command(matches: &clap::ArgMatches) {
 
 // Tips commands
 
+/// Get a tip for a given tool (or, eventually a random one.)
 pub fn handle_tips_get_command(matches: &clap::ArgMatches) {
     let tool = matches.value_of("TOOL").unwrap();
     let database = Database::require();
 
     if let Some(tool) = database.get_tool(tool) {
-        println!("{}", tool.get_random_tip());
+        println!("{}", tool.get_random_tip().expect("Could not get tip"));
     }
 }
