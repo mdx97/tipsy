@@ -3,10 +3,6 @@
 use crate::db::Database;
 use crate::util::get_tool_path;
 
-// There are several Option::unwrap calls in this file on the return value of
-// matches.value_of("TOOL"). These are all safe because our clap definitions prevent this option
-// from ever being None.
-
 // Tools commands
 
 /// Adds a new tool to the database.
@@ -42,7 +38,7 @@ pub fn handle_tools_list_command(_matches: &clap::ArgMatches) {
 
 // Tips commands
 
-/// Get a tip for a given tool (or a random one, if one was not specified.)
+/// Prints out a tip for a given tool (or a random one, if one was not specified.)
 pub fn handle_tips_get_command(matches: &clap::ArgMatches) {
     let database = Database::require();
 
