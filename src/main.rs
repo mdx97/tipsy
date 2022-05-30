@@ -3,6 +3,7 @@
 mod cli;
 mod consts;
 mod db;
+mod tool;
 mod util;
 
 use crate::cli::{build_command, handle_command};
